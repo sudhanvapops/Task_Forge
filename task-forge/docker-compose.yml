@@ -1,0 +1,19 @@
+services:
+    postgres:
+        image: postgres:16-alpine
+        container_name: task-forge-dev
+        restart: unless-stopped
+
+        environment:
+            POSTGRES_DB: task-forge
+            POSTGRES_USER: sudhanva
+            POSTGRES_PASSWORD: sudhanva
+
+        ports:
+        - "5433:5432"
+
+        volumes:
+        - postgres_data:/var/lib/postgresql/data
+
+volumes:
+    postgres_data:
