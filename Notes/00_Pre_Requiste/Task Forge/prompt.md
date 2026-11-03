@@ -95,3 +95,45 @@ END OF BLOCK
 START: begin with ORIENTATION FIRST. Do not summarize this brief back to me.
 
 === BLOCK ===
+
+BLOCK A — Async Foundations
+Time box: ~6 hours · Roadmap step 1
+
+Goal
+A request returns immediately with an ID while work happens in the background. In-memory only. It will lose everything on restart, and that's the point.
+
+Covers
+Thread pools & ExecutorService: core/max size, bounded queue, rejection policy
+Spring @Async / TaskExecutor: why the default SimpleAsyncTaskExecutor is a trap (creates a thread per task, no cap)
+The 202 Accepted pattern: POST /jobs → 202 + job ID + Location header; GET /jobs/{id} to poll
+Handler abstraction: a JobHandler interface keyed by job type (design this now, you'll reuse it all phase)
+Left out (intentionally)
+Skipped    Why
+CompletableFuture chaining, reactive, Flux/Mono    Not needed; jobs are fire-and-track
+Virtual threads deep dive    Aware they exist; revisit after Phase 1
+ForkJoinPool, parallel streams    Wrong tool for I/O-ish jobs
+Spring Batch, Quartz, JobRunr    That's the thing you're building. Don't import the answer.
+Kafka / RabbitMQ / Redis    Deliberate: feel Postgres queue limits first
+Depth ceiling
+Intermediate. You must be able to explain why an unbounded pool is a memory leak and what a rejection policy does. You do not need to know ThreadPoolExecutor's internals line by line.
+
+Micro-tasks
+ A0 (1h) Create repo skeleton, Spring Boot + Postgres via Docker Compose, Flyway wired (empty migration), one Testcontainers smoke test passes.
+ A1 (1h) Define JobHandler interface + one handler (EchoJobHandler that sleeps N seconds then returns).
+ A2 (1.5h) Hand-build a ThreadPoolExecutor (bounded queue, named threads, explicit rejection policy). No @Async yet.
+ A3 (1h) POST /jobs → 202 Accepted + ID. GET /jobs/{id} returns status from an in-memory ConcurrentHashMap.
+ A4 (1h) Now swap to Spring TaskExecutor bean config. Compare to A2: what did Spring save you?
+ A5 (0.5h) Write 3 lines in docs/tradeoffs.md: why 202 and not blocking 200.
+Deliberate failure
+Submit 10,000 jobs against an unbounded queue. Watch heap grow (jconsole or jcmd).
+Switch to a bounded queue; submit again. Observe what happens when it's full. Make the API return 429/503 instead of crashing.
+Restart the app mid-job. Everything's gone. Screenshot it. This motivates Block B.
+Closed-book check
+Why does Executors.newCachedThreadPool() risk killing the JVM?
+What are the 4 built-in rejection policies and which would you pick for a job API?
+Why is 202 the right response and what must it include?
+Exit criteria
+ Submit a job, get 202 in < 50ms, poll until SUCCEEDED.
+ Queue full → client gets a clean error, app survives.
+ You can explain the unbounded-pool memory leak from your own heap observation.
+ Restart loses jobs, and you've written down why that's unacceptable.
