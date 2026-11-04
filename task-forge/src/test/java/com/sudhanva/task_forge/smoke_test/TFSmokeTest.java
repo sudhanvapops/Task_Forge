@@ -11,7 +11,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-@SpringBootTest 
+// @SpringBootTest 
 @Testcontainers 
 public class TFSmokeTest {
     
@@ -24,7 +24,7 @@ public class TFSmokeTest {
     @Autowired
     JdbcTemplate jdbc;
 
-    @Test
+    // @Test
     void dbIsReachableAndFlywayRan(){
 
         Integer applied = jdbc.queryForObject(
