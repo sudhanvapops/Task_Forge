@@ -35,9 +35,5 @@ public class JobHandlerRegistry {
 
     // The compiler still cannot prove that the handler and payload match
     // The runtime class check provides that guarantee
-
-    
-
-    
     
 }

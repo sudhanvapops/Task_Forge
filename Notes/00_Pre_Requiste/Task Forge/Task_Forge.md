@@ -134,8 +134,8 @@ A request returns immediately with an ID while work happens in the background. I
 **Intermediate.** You must be able to explain *why* an unbounded pool is a memory leak and what a rejection policy does. You do **not** need to know ThreadPoolExecutor's internals line by line.
 
 ### Micro-tasks
-- [ ] **A0 (1h)** Create repo skeleton, Spring Boot + Postgres via Docker Compose, Flyway wired (empty migration), one Testcontainers smoke test passes.
-- [ ] **A1 (1h)** Define `JobHandler` interface + one handler (`EchoJobHandler` that sleeps N seconds then returns).
+- [x] **A0 (1h)** Create repo skeleton, Spring Boot + Postgres via Docker Compose, Flyway wired (empty migration), one Testcontainers smoke test passes.
+- [x] **A1 (1h)** Define `JobHandler` interface + one handler (`EchoJobHandler` that sleeps N seconds then returns).
 - [ ] **A2 (1.5h)** Hand-build a `ThreadPoolExecutor` (bounded queue, named threads, explicit rejection policy). No `@Async` yet.
 - [ ] **A3 (1h)** `POST /jobs` → `202 Accepted` + ID. `GET /jobs/{id}` returns status from an in-memory `ConcurrentHashMap`.
 - [ ] **A4 (1h)** Now swap to Spring `TaskExecutor` bean config. Compare to A2: what did Spring save you?
