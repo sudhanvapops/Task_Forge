@@ -1,5 +1,6 @@
 package com.sudhanva.task_forge.common.exception;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 import org.springframework.http.HttpStatus;
@@ -21,7 +22,7 @@ public class GlobalExceptionHandler {
             .success(false)
             .errorCode(ErrorCode.INTERNAL_SERVER_ERROR)
             .message(exception.getMessage())
-            .timestamp(LocalDateTime.now())
+            .timestamp(Instant.now())
             .build();
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);

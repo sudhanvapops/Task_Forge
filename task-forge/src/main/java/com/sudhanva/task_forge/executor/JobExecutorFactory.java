@@ -7,9 +7,12 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.springframework.stereotype.Component;
+
 // Create a configured ThreadPoolExecutor 
 // and return it to whoever requests it
 // Custom ThreadPoolFactory for my Wants
+@Component
 public class JobExecutorFactory {
 
     // Thread Factory

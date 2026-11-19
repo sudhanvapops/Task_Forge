@@ -42,14 +42,17 @@ public class InMemoryJobStore implements JobStore{
     public boolean updateStatus(UUID id, JobStatus newStatus) {
         // update is done by worker thread so .orElseThrow() 
         // there is no http request waiting for this it wont reach controller advice
-        Job job = this.findById(id).orElseThrow();
-        Job newJob = new Job(
-            id,
-            newStatus,
-            job.type()
+        // if u do normally like find and replce with new 
+        // it will introduce race condition
+        Job updated = jobs.computeIfPresent(
+            id, 
+            (key,oldJob) -> new Job(
+                oldJob.id(),
+                newStatus,
+                oldJob.type()
+            )
         );
-        jobs.replace(id, newJob);
-        return true;
+        return updated != null;
     }
     
 }
