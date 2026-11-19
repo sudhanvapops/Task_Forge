@@ -31,8 +31,8 @@ public class JobExecutorFactory {
             30, 
             TimeUnit.SECONDS,
             // Waits in push and pop operation when ful lor empty
-            // new ArrayBlockingQueue<>(10),
-            new LinkedBlockingQueue<>(),
+            new ArrayBlockingQueue<>(10),
+            // new LinkedBlockingQueue<>(),
             factory,
             new ThreadPoolExecutor.AbortPolicy()
         );

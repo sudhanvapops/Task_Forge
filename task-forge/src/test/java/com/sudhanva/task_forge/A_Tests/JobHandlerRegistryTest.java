@@ -10,10 +10,10 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import com.sudhanva.task_forge.job.JobHandler;
-import com.sudhanva.task_forge.job.JobHandlerRegistry;
-import com.sudhanva.task_forge.job.JobType;
 import com.sudhanva.task_forge.job.handler.EchoJobHandler;
+import com.sudhanva.task_forge.job.interfaces.JobHandler;
+import com.sudhanva.task_forge.job.interfaces.JobHandlerRegistry;
+import com.sudhanva.task_forge.job.interfaces.JobType;
 
 @SpringBootTest
 @Testcontainers 

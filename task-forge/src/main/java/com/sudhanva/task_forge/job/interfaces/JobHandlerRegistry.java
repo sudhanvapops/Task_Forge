@@ -1,4 +1,4 @@
-package com.sudhanva.task_forge.job;
+package com.sudhanva.task_forge.job.interfaces;
 
 import java.util.List;
 import java.util.Map;

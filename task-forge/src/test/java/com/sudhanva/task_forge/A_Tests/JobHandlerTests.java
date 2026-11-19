@@ -6,11 +6,11 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import com.sudhanva.task_forge.job.JobHandler;
-import com.sudhanva.task_forge.job.JobHandlerRegistry;
-import com.sudhanva.task_forge.job.JobType;
 import com.sudhanva.task_forge.job.handler.EchoJobHandler;
 import com.sudhanva.task_forge.job.handler.EchoPayload;
+import com.sudhanva.task_forge.job.interfaces.JobHandler;
+import com.sudhanva.task_forge.job.interfaces.JobHandlerRegistry;
+import com.sudhanva.task_forge.job.interfaces.JobType;
 
 public class JobHandlerTests {
     

@@ -2,8 +2,8 @@ package com.sudhanva.task_forge.job.handler;
 
 import org.springframework.stereotype.Component;
 
-import com.sudhanva.task_forge.job.JobHandler;
-import com.sudhanva.task_forge.job.JobType;
+import com.sudhanva.task_forge.job.interfaces.JobHandler;
+import com.sudhanva.task_forge.job.interfaces.JobType;
 
 @Component 
 public class EchoJobHandler implements JobHandler<EchoPayload, String>{

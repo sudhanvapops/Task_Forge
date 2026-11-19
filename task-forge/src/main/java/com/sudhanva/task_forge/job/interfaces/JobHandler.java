@@ -1,4 +1,4 @@
-package com.sudhanva.task_forge.job;
+package com.sudhanva.task_forge.job.interfaces;
 
 // Interface for each handlers
 // P specifc payload class

@@ -1,6 +1,6 @@
 package com.sudhanva.task_forge.job.handler;
 
-import com.sudhanva.task_forge.job.JobPayload;
+import com.sudhanva.task_forge.job.interfaces.JobPayload;
 
 public record EchoPayload(
     String message,
