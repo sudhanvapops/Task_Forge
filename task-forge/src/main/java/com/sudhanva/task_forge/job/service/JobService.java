@@ -10,18 +10,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+
 import com.sudhanva.task_forge.job.api.dto.SubmitJobRequest;
 import com.sudhanva.task_forge.job.exceptions.ExecutorShutdownException;
 import com.sudhanva.task_forge.job.exceptions.InvalidPayloadException;
-import com.sudhanva.task_forge.job.exceptions.JobException;
 import com.sudhanva.task_forge.job.exceptions.JobNotFoundException;
 import com.sudhanva.task_forge.job.exceptions.QueueFullException;
 import com.sudhanva.task_forge.job.interfaces.JobHandler;
 import com.sudhanva.task_forge.job.interfaces.JobHandlerRegistry;
 import com.sudhanva.task_forge.job.interfaces.JobPayload;
-import com.sudhanva.task_forge.job.interfaces.JobType;
 import com.sudhanva.task_forge.job.model.Job;
 import com.sudhanva.task_forge.job.model.enums.JobStatus;
 import com.sudhanva.task_forge.job.store.JobStore;

@@ -2,8 +2,8 @@ package com.sudhanva.task_forge.job.exception_handlers;
 
 
 import java.time.Instant;
-import java.util.concurrent.RejectedExecutionException;
 
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -18,6 +18,7 @@ import com.sudhanva.task_forge.job.exceptions.JobNotFoundException;
 import com.sudhanva.task_forge.job.exceptions.QueueFullException;
 
 @RestControllerAdvice
+@Order(1)
 public class JobExceptionHandler {
 
     @ExceptionHandler(DuplicateJobException.class)

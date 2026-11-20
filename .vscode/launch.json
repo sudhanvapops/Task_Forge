@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-TaskForgeApplication<task-forge>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.sudhanva.task_forge.TaskForgeApplication",
+            "projectName": "task-forge",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}
