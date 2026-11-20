@@ -1,0 +1,1467 @@
+====================================================================================================
+FILE: combine.py
+====================================================================================================
+
+from pathlib import Path
+
+# ==========================
+# USER INPUT
+# ==========================
+
+SOURCE_FOLDER = input("Enter the source folder path: ").strip()
+OUTPUT_FILE = input("Enter the output file path (e.g., C:\\combined.txt): ").strip()
+
+source = Path(SOURCE_FOLDER).resolve()
+output_path = Path(OUTPUT_FILE).resolve()
+
+# ==========================
+# FILE TYPES TO INCLUDE
+# ==========================
+
+EXTENSIONS = {
+    ".txt",
+    ".md",
+    ".py",
+    ".java",
+    ".kt",
+    ".kts",
+    ".js",
+    ".jsx",
+    ".ts",
+    ".tsx",
+    ".html",
+    ".css",
+    ".scss",
+    ".sass",
+    ".json",
+    ".xml",
+    ".yaml",
+    ".yml",
+    ".properties",
+    ".gradle",
+    ".sql",
+    ".c",
+    ".cpp",
+    ".cc",
+    ".h",
+    ".hpp",
+    ".cs",
+    ".go",
+    ".rs",
+    ".php",
+    ".rb",
+    ".swift",
+    ".dart",
+    ".sh",
+    ".bat",
+    ".ps1",
+    ".env",
+    ".gitignore"
+}
+
+# ==========================
+# FOLDERS TO IGNORE
+# ==========================
+
+IGNORE_DIRS = {
+    # Git
+    ".git",
+
+    # Node.js
+    "node_modules",
+    ".next",
+    ".npm",
+    ".pnpm-store",
+    ".turbo",
+
+    # React / Vite
+    "dist",
+    "build",
+    "coverage",
+
+    # Python
+    "__pycache__",
+    ".venv",
+    "venv",
+    "env",
+    ".pytest_cache",
+    ".mypy_cache",
+
+    # Java / Spring Boot
+    "target",
+    ".gradle",
+    "out",
+    "bin",
+
+    # Maven wrapper
+    ".mvn",
+
+    # IDEs
+    ".idea",
+    ".vscode",
+
+    # OS
+    ".DS_Store"
+}
+
+print("\nScanning files...\n")
+
+files_processed = 0
+files_skipped = 0
+
+with open(output_path, "w", encoding="utf-8") as outfile:
+
+    for file in sorted(source.rglob("*")):
+
+        # Skip ignored folders
+        if any(part in IGNORE_DIRS for part in file.parts):
+            continue
+
+        # Skip output file
+        if file.resolve() == output_path:
+            continue
+
+        # Skip non-files
+        if not file.is_file():
+            continue
+
+        # Skip unwanted extensions
+        if file.suffix.lower() not in EXTENSIONS:
+            continue
+
+        print(f"Reading: {file.relative_to(source)}")
+
+        outfile.write("=" * 100 + "\n")
+        outfile.write(f"FILE: {file.relative_to(source)}\n")
+        outfile.write("=" * 100 + "\n\n")
+
+        try:
+            with open(file, "r", encoding="utf-8") as infile:
+                outfile.write(infile.read())
+                files_processed += 1
+
+        except Exception as e:
+            outfile.write(f"[Could not read file: {e}]")
+            files_skipped += 1
+
+        outfile.write("\n\n")
+
+print("\n" + "=" * 50)
+print("Completed!")
+print("=" * 50)
+print(f"Files merged   : {files_processed}")
+print(f"Files skipped  : {files_skipped}")
+print(f"Output saved to: {output_path}")
+
+====================================================================================================
+FILE: docker-compose.yml
+====================================================================================================
+
+services:
+    postgres:
+        image: postgres:16-alpine
+        container_name: task-forge-dev
+        restart: unless-stopped
+
+        environment:
+            POSTGRES_DB: task-forge
+            POSTGRES_USER: sudhanva
+            POSTGRES_PASSWORD: sudhanva
+
+        ports:
+        - "5433:5432"
+
+        volumes:
+        - postgres_data:/var/lib/postgresql/data
+
+volumes:
+    postgres_data:
+
+====================================================================================================
+FILE: HELP.md
+====================================================================================================
+
+# Getting Started
+
+### Reference Documentation
+For further reference, please consider the following sections:
+
+* [Official Apache Maven documentation](https://maven.apache.org/guides/index.html)
+* [Spring Boot Maven Plugin Reference Guide](https://docs.spring.io/spring-boot/4.1.2/maven-plugin)
+* [Create an OCI image](https://docs.spring.io/spring-boot/4.1.2/maven-plugin/build-image.html)
+* [Spring Web](https://docs.spring.io/spring-boot/4.1.2/reference/web/servlet.html)
+* [Spring Data JPA](https://docs.spring.io/spring-boot/4.1.2/reference/data/sql.html#data.sql.jpa-and-spring-data)
+* [Spring Boot DevTools](https://docs.spring.io/spring-boot/4.1.2/reference/using/devtools.html)
+
+### Guides
+The following guides illustrate how to use some features concretely:
+
+* [Building a RESTful Web Service](https://spring.io/guides/gs/rest-service/)
+* [Serving Web Content with Spring MVC](https://spring.io/guides/gs/serving-web-content/)
+* [Building REST services with Spring](https://spring.io/guides/tutorials/rest/)
+* [Accessing Data with JPA](https://spring.io/guides/gs/accessing-data-jpa/)
+
+### Maven Parent overrides
+
+Due to Maven's design, elements are inherited from the parent POM to the project POM.
+While most of the inheritance is fine, it also inherits unwanted elements like `<license>` and `<developers>` from the parent.
+To prevent this, the project POM contains empty overrides for these elements.
+If you manually switch to a different parent and actually want the inheritance, you need to remove those overrides.
+
+
+
+====================================================================================================
+FILE: pom.xml
+====================================================================================================
+
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>4.1.2</version>
+		<relativePath/>
+		<!-- lookup parent from repository -->
+	</parent>
+	<groupId>com.sudhanva</groupId>
+	<artifactId>task-forge</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>task-forge</name>
+	<description/>
+	<url/>
+	<licenses>
+		<license/>
+	</licenses>
+	<developers>
+		<developer/>
+	</developers>
+	<scm>
+		<connection/>
+		<developerConnection/>
+		<tag/>
+		<url/>
+	</scm>
+	<properties>
+		<java.version>21</java.version>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-webmvc</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+			<scope>runtime</scope>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-webmvc-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>2.8.9</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-flyway</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-database-postgresql</artifactId>
+			<!-- <version>13.3.0</version> -->
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-testcontainers</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>1.21.4</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<version>1.21.4</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-validation</artifactId>
+		</dependency>
+	</dependencies>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<configuration>
+					<mainClass>com.sudhanva.task_forge.scratch.A2PoolDemo</mainClass>
+				</configuration>
+				<version>3.5.0</version>
+			</plugin>
+			<!-- <plugin>
+				<groupId>org.flywaydb</groupId>
+				<artifactId>flyway-maven-plugin</artifactId>
+				<version>12.4.0</version>
+				<configuration>
+					<url>jdbc:postgresql://localhost:5432/task-forge</url>
+					<user>sudhanva</user>
+					<password>sudhanva</password>
+				</configuration>
+			</plugin> -->
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>default-compile</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>compile</goal>
+						</goals>
+						<configuration>
+							<annotationProcessorPaths>
+								<path>
+									<groupId>org.projectlombok</groupId>
+									<artifactId>lombok</artifactId>
+								</path>
+							</annotationProcessorPaths>
+						</configuration>
+					</execution>
+					<execution>
+						<id>default-testCompile</id>
+						<phase>test-compile</phase>
+						<goals>
+							<goal>testCompile</goal>
+						</goals>
+						<configuration>
+							<annotationProcessorPaths>
+								<path>
+									<groupId>org.projectlombok</groupId>
+									<artifactId>lombok</artifactId>
+								</path>
+							</annotationProcessorPaths>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>
+
+====================================================================================================
+FILE: src\main\java\com\sudhanva\task_forge\common\api\ApiResponse.java
+====================================================================================================
+
+package com.sudhanva.task_forge.common.api;
+
+public record ApiResponse<T>(
+    boolean status,
+    String message,
+    T data
+) {}
+
+
+====================================================================================================
+FILE: src\main\java\com\sudhanva\task_forge\common\api\ErrorCode.java
+====================================================================================================
+
+package com.sudhanva.task_forge.common.api;
+
+public enum ErrorCode {
+    INTERNAL_SERVER_ERROR,
+    CONFLICT,
+    BAD_REQUEST,
+
+    JOB_NOT_FOUND,
+    QUEUE_FULL,
+    EXECUTOR_SHUTDOWN,
+    INVALID_PAYLOAD
+
+
+
+}
+
+====================================================================================================
+FILE: src\main\java\com\sudhanva\task_forge\common\api\ErrorResponseDto.java
+====================================================================================================
+
+package com.sudhanva.task_forge.common.api;
+
+import java.time.Instant;
+import java.time.LocalDateTime;
+
+import lombok.Builder;
+
+@Builder
+public record ErrorResponseDto(
+    boolean success,
+    ErrorCode errorCode,
+    String message,
+    Instant timestamp
+) {
+    
+}
+
+
+====================================================================================================
+FILE: src\main\java\com\sudhanva\task_forge\common\exception\GlobalExceptionHandler.java
+====================================================================================================
+
+package com.sudhanva.task_forge.common.exception;
+
+import java.time.Instant;
+import java.time.LocalDateTime;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import com.sudhanva.task_forge.common.api.ErrorCode;
+import com.sudhanva.task_forge.common.api.ErrorResponseDto;
+
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+    
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponseDto> globalHandler(
+        Exception exception
+    ){
+        ErrorResponseDto response = ErrorResponseDto.builder()
+            .success(false)
+            .errorCode(ErrorCode.INTERNAL_SERVER_ERROR)
+            .message(exception.getMessage())
+            .timestamp(Instant.now())
+            .build();
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponseDto> handleInvalidJson(
+        HttpMessageNotReadableException exception
+    ) {
+
+        ErrorResponseDto response = ErrorResponseDto.builder()
+            .success(false)
+            .errorCode(ErrorCode.BAD_REQUEST)
+            .message(exception.getMessage())
+            .timestamp(Instant.now())
+            .build();
+        return ResponseEntity.badRequest().body(response);
+    }
+    
+}
+
+
+====================================================================================================
+FILE: src\main\java\com\sudhanva\task_forge\config\ExecutorConfig.java
+====================================================================================================
+
+package com.sudhanva.task_forge.config;
+
+import java.util.concurrent.ThreadPoolExecutor;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import com.sudhanva.task_forge.executor.JobExecutorFactory;
+
+import lombok.RequiredArgsConstructor;
+
+@Configuration
+@RequiredArgsConstructor
+public class ExecutorConfig {
+    
+    private final JobExecutorFactory executorFactory;
+
+    // Qualifier if you have two beans and how to shutdown
+    @Bean(name = "jobExecutor", destroyMethod = "shutdown")
+    public ThreadPoolExecutor jobExecutor() {
+        return executorFactory.createExecutor();
+    }
+
+}
+
+
+====================================================================================================
+FILE: src\main\java\com\sudhanva\task_forge\executor\JobExecutorFactory.java
+====================================================================================================
+
+package com.sudhanva.task_forge.executor;
+
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.springframework.stereotype.Component;
+
+// Create a configured ThreadPoolExecutor 
+// and return it to whoever requests it
+// Custom ThreadPoolFactory for my Wants
+@Component
+public class JobExecutorFactory {
+
+    // Thread Factory
+    private final AtomicInteger counter = new AtomicInteger(1);
+
+    private final ThreadFactory factory = 
+            runnable -> new Thread(
+                runnable,
+                "job-worker-"+counter.getAndIncrement()
+            );
+
+
+    // Create and return the pool
+    public ThreadPoolExecutor createExecutor(){
+        ThreadPoolExecutor pool = new ThreadPoolExecutor(
+            2, 
+            4,
+            // This is for new worker cretaed and how much time keep them alive if idle
+            30, 
+            TimeUnit.SECONDS,
+            // Waits in push and pop operation when ful lor empty
+            new ArrayBlockingQueue<>(10),
+            // new LinkedBlockingQueue<>(),
+            factory,
+            new ThreadPoolExecutor.AbortPolicy()
+        );
+
+        return pool;
+    }
+   
+}
+
+
+====================================================================================================
+FILE: src\main\java\com\sudhanva\task_forge\job\api\contoller\JobController.java
+====================================================================================================
+
+package com.sudhanva.task_forge.job.api.contoller;
+
+public class JobController {
+    
+}
+
+
+====================================================================================================
+FILE: src\main\java\com\sudhanva\task_forge\job\api\dto\JobResponse.java
+====================================================================================================
+
+package com.sudhanva.task_forge.job.api.dto;
+
+public record JobResponse() {
+    
+}
+
+
+====================================================================================================
+FILE: src\main\java\com\sudhanva\task_forge\job\api\dto\SubmitJobRequest.java
+====================================================================================================
+
+package com.sudhanva.task_forge.job.api.dto;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.sudhanva.task_forge.job.interfaces.JobType;
+
+import jakarta.validation.constraints.NotNull;
+
+public record SubmitJobRequest(
+    @NotNull(message = "Job type is required") JobType type,
+    @NotNull(message = "Payload is required") JsonNode payload
+
+) {
+    
+}
+
+
+====================================================================================================
+FILE: src\main\java\com\sudhanva\task_forge\job\exception_handlers\JobExceptionHandler.java
+====================================================================================================
+
+package com.sudhanva.task_forge.job.exception_handlers;
+
+
+import java.time.Instant;
+import java.util.concurrent.RejectedExecutionException;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import com.sudhanva.task_forge.common.api.ErrorCode;
+import com.sudhanva.task_forge.common.api.ErrorResponseDto;
+import com.sudhanva.task_forge.job.exceptions.DuplicateJobException;
+import com.sudhanva.task_forge.job.exceptions.ExecutorShutdownException;
+import com.sudhanva.task_forge.job.exceptions.InvalidPayloadException;
+import com.sudhanva.task_forge.job.exceptions.JobNotFoundException;
+import com.sudhanva.task_forge.job.exceptions.QueueFullException;
+
+@RestControllerAdvice
+public class JobExceptionHandler {
+
+    @ExceptionHandler(DuplicateJobException.class)
+    public ResponseEntity<ErrorResponseDto> handleDuplicatejob(
+        DuplicateJobException exception
+    ){
+        ErrorResponseDto response = ErrorResponseDto.builder()
+            .success(false)
+            .errorCode(ErrorCode.CONFLICT)
+            .message(exception.getMessage())
+            .timestamp(Instant.now())
+            .build();
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
+    @ExceptionHandler
+     public ResponseEntity<ErrorResponseDto> jobNotFound(
+        JobNotFoundException exception
+    ){
+        ErrorResponseDto response = ErrorResponseDto.builder()
+            .success(false)
+            .errorCode(ErrorCode.JOB_NOT_FOUND)
+            .message(exception.getMessage())
+            .timestamp(Instant.now())
+            .build();
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+
+    @ExceptionHandler
+     public ResponseEntity<ErrorResponseDto> handleQueueFull(
+        QueueFullException exception
+    ){
+        ErrorResponseDto response = ErrorResponseDto.builder()
+            .success(false)
+            .errorCode(ErrorCode.QUEUE_FULL)
+            .message(exception.getMessage())
+            .timestamp(Instant.now())
+            .build();
+
+        // 503
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(response);
+    }
+
+    @ExceptionHandler
+     public ResponseEntity<ErrorResponseDto> handleExecutorShutdown(
+        ExecutorShutdownException exception
+    ){
+        ErrorResponseDto response = ErrorResponseDto.builder()
+            .success(false)
+            .errorCode(ErrorCode.EXECUTOR_SHUTDOWN)
+            .message(exception.getMessage())
+            .timestamp(Instant.now())
+            .build();
+
+        // 503
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(response);
+    }
+
+    @ExceptionHandler(InvalidPayloadException.class)
+    public ResponseEntity<ErrorResponseDto> handleInvalidPayload(InvalidPayloadException exception) {
+        ErrorResponseDto response = ErrorResponseDto.builder()
+            .success(false)
+            .errorCode(ErrorCode.INVALID_PAYLOAD)
+            .message(exception.getMessage())
+            .timestamp(Instant.now())
+            .build();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+
+}
+
+
+====================================================================================================
+FILE: src\main\java\com\sudhanva\task_forge\job\exceptions\DuplicateJobException.java
+====================================================================================================
+
+package com.sudhanva.task_forge.job.exceptions;
+
+import java.util.UUID;
+
+public class DuplicateJobException extends JobException{
+    public DuplicateJobException(UUID id) {
+        super("Job already exists: " + id);
+    }
+}
+
+
+====================================================================================================
+FILE: src\main\java\com\sudhanva\task_forge\job\exceptions\ExecutorShutdownException.java
+====================================================================================================
+
+package com.sudhanva.task_forge.job.exceptions;
+
+public class ExecutorShutdownException extends JobException {
+    public ExecutorShutdownException() {
+        super("Executor Serivce is Shutdown");
+    }
+}
+
+
+====================================================================================================
+FILE: src\main\java\com\sudhanva\task_forge\job\exceptions\InvalidPayloadException.java
+====================================================================================================
+
+package com.sudhanva.task_forge.job.exceptions;
+
+public class InvalidPayloadException extends JobException {
+    public InvalidPayloadException(String message) { super(message); }
+    public InvalidPayloadException(String message, Throwable cause) { super(message, cause); }
+}
+
+====================================================================================================
+FILE: src\main\java\com\sudhanva\task_forge\job\exceptions\JobException.java
+====================================================================================================
+
+package com.sudhanva.task_forge.job.exceptions;
+
+public class JobException extends RuntimeException{
+    public JobException(String message) {
+        super(message);
+    }
+
+    public JobException(String message, Throwable cause) {
+        super(message, cause);
+    }   
+}
+
+
+
+
+====================================================================================================
+FILE: src\main\java\com\sudhanva\task_forge\job\exceptions\JobNotFoundException.java
+====================================================================================================
+
+package com.sudhanva.task_forge.job.exceptions;
+
+import java.util.UUID;
+
+public class JobNotFoundException  extends JobException {
+    public  JobNotFoundException(UUID id){
+        super("Job not found: "+id);
+    }
+}
+
+
+====================================================================================================
+FILE: src\main\java\com\sudhanva\task_forge\job\exceptions\QueueFullException.java
+====================================================================================================
+
+package com.sudhanva.task_forge.job.exceptions;
+
+public class QueueFullException extends JobException{
+    public QueueFullException() {
+        super("Queue is Full");
+    }
+}
+
+
+====================================================================================================
+FILE: src\main\java\com\sudhanva\task_forge\job\handler\EchoJobHandler.java
+====================================================================================================
+
+package com.sudhanva.task_forge.job.handler;
+
+import org.springframework.stereotype.Component;
+
+import com.sudhanva.task_forge.job.interfaces.JobHandler;
+import com.sudhanva.task_forge.job.interfaces.JobType;
+
+@Component 
+public class EchoJobHandler implements JobHandler<EchoPayload, String>{
+
+    @Override
+    public String execute(EchoPayload payload) throws Exception {
+        Thread.sleep(payload.delayMs()); 
+        return "Echoed: "+payload.message();
+    }
+
+    @Override
+    public JobType type() {
+        return JobType.ECHO;
+    }
+
+    @Override
+    public Class<EchoPayload> payloadType() {
+        return EchoPayload.class;
+    }
+
+    
+    
+}
+
+
+====================================================================================================
+FILE: src\main\java\com\sudhanva\task_forge\job\handler\EchoPayload.java
+====================================================================================================
+
+package com.sudhanva.task_forge.job.handler;
+
+import com.sudhanva.task_forge.job.interfaces.JobPayload;
+
+public record EchoPayload(
+    String message,
+    // in ms
+    long delayMs // using primitive ssince it cannot be null
+) implements JobPayload {
+
+    public EchoPayload{
+
+        if (message == null || message.isBlank()){
+            throw new IllegalArgumentException("Message cannot be empty");
+        }
+
+        if (delayMs < 0 ){
+            throw new IllegalArgumentException("delay must be positive");
+        }
+        
+        if (delayMs > 9000){
+            throw new IllegalArgumentException("delay must not exceed 9 seconds");
+        }
+    }
+
+}
+
+
+====================================================================================================
+FILE: src\main\java\com\sudhanva\task_forge\job\interfaces\JobHandler.java
+====================================================================================================
+
+package com.sudhanva.task_forge.job.interfaces;
+
+// Interface for each handlers
+// P specifc payload class
+// R result retun by the handler
+public interface JobHandler <P extends JobPayload, R>{
+    
+    // gives what type of payload is
+    JobType type(); 
+    // process the types payload and return a result
+    R execute(P payload) throws Exception;
+    // To retorve the class 
+    // beacuse while casting The regestry losses the class Information
+    // P tells the compiler the type; Class<P> lets us check and cast objects to that type at runtime.
+    Class<P> payloadType();
+
+    default R executeUntyped(JobPayload payload) throws Exception {
+        return execute(payloadType().cast(payload));
+    }
+}
+
+
+====================================================================================================
+FILE: src\main\java\com\sudhanva\task_forge\job\interfaces\JobHandlerRegistry.java
+====================================================================================================
+
+package com.sudhanva.task_forge.job.interfaces;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Component;
+
+// dleagets teh work to appropriate handler
+@Component
+public class JobHandlerRegistry {
+    
+    private final Map<JobType,JobHandler<?,?>> jobHandlers;
+
+    public JobHandlerRegistry(List<JobHandler<?,?>> handlers){
+        jobHandlers =  handlers.stream().collect(
+            Collectors.toUnmodifiableMap( 
+                handler -> handler.type(), 
+                handler -> handler
+            )
+        );
+    }
+
+    public JobHandler<?,?> getHandler(JobType type){
+        JobHandler<?,?> handler = jobHandlers.get(type);
+        if (handler == null){
+           throw new IllegalArgumentException(
+                "No handler for: " + type +
+                ". Registered handlers: " + jobHandlers.keySet()
+            );
+        }
+            
+        return handler;
+    }
+
+    // The compiler still cannot prove that the handler and payload match
+    // The runtime class check provides that guarantee
+    
+}
+
+
+====================================================================================================
+FILE: src\main\java\com\sudhanva\task_forge\job\interfaces\JobPayload.java
+====================================================================================================
+
+package com.sudhanva.task_forge.job.interfaces;
+
+// This is just a Marker Interface
+// Which purpose is to just know this exist
+public interface JobPayload {}
+
+
+====================================================================================================
+FILE: src\main\java\com\sudhanva\task_forge\job\interfaces\JobType.java
+====================================================================================================
+
+package com.sudhanva.task_forge.job.interfaces;
+
+public enum JobType {
+    ECHO
+}
+
+
+====================================================================================================
+FILE: src\main\java\com\sudhanva\task_forge\job\model\enums\JobStatus.java
+====================================================================================================
+
+package com.sudhanva.task_forge.job.model.enums;
+
+public enum JobStatus {
+    QUEUED,
+    RUNNING,
+    SUCCEEDED,
+    FAILED,
+    RETRYING,
+    DEAD
+}
+
+
+====================================================================================================
+FILE: src\main\java\com\sudhanva\task_forge\job\model\Job.java
+====================================================================================================
+
+package com.sudhanva.task_forge.job.model;
+
+import java.util.UUID;
+
+import com.sudhanva.task_forge.job.interfaces.JobType;
+import com.sudhanva.task_forge.job.model.enums.JobStatus;
+
+public record Job(
+    UUID id,
+    JobStatus status,
+    JobType type
+) {}
+
+
+====================================================================================================
+FILE: src\main\java\com\sudhanva\task_forge\job\service\JobService.java
+====================================================================================================
+
+package com.sudhanva.task_forge.job.service;
+
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sudhanva.task_forge.job.api.dto.SubmitJobRequest;
+import com.sudhanva.task_forge.job.exceptions.ExecutorShutdownException;
+import com.sudhanva.task_forge.job.exceptions.InvalidPayloadException;
+import com.sudhanva.task_forge.job.exceptions.JobException;
+import com.sudhanva.task_forge.job.exceptions.JobNotFoundException;
+import com.sudhanva.task_forge.job.exceptions.QueueFullException;
+import com.sudhanva.task_forge.job.interfaces.JobHandler;
+import com.sudhanva.task_forge.job.interfaces.JobHandlerRegistry;
+import com.sudhanva.task_forge.job.interfaces.JobPayload;
+import com.sudhanva.task_forge.job.interfaces.JobType;
+import com.sudhanva.task_forge.job.model.Job;
+import com.sudhanva.task_forge.job.model.enums.JobStatus;
+import com.sudhanva.task_forge.job.store.JobStore;
+
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validator;
+import lombok.RequiredArgsConstructor;
+
+
+// Test These
+// good:           {"type":"ECHO","payload":{"message":"hi"}}   -> 202
+// wrong shape:    {"type":"ECHO","payload":{"x":1}}            -> 400 (not 500)
+// unknown type:   {"type":"NOPE","payload":{}}                 -> 400
+// missing payload:{"type":"ECHO"}                              -> 400
+
+@Service
+@RequiredArgsConstructor
+public class JobService {
+    
+    private final JobStore store;
+    private final ThreadPoolExecutor jobExecutor;
+    private final JobHandlerRegistry registry;
+    private final ObjectMapper objectMapper;
+    private final Validator validator;
+
+
+    private static final Logger log = 
+            LoggerFactory.getLogger(JobService.class);
+
+
+    public Job submit(SubmitJobRequest request) {
+        // checks that can fail come first
+        // state changes last
+        JobHandler<?, ?> handler = registry.getHandler(request.type());
+        JobPayload payload = toPayload(request.payload(), handler);
+
+        Job job = new Job(UUID.randomUUID(), JobStatus.QUEUED, request.type());
+
+        store.save(job);
+
+        try {
+            jobExecutor.execute(() -> runJob(job.id(), handler,payload));
+        } catch (RejectedExecutionException e) {
+            store.remove(job.id());
+            throw jobExecutor.isShutdown()
+                ? new ExecutorShutdownException()
+                : new QueueFullException();
+        }
+        return job;
+    }
+
+
+     // JSON -> payload object, then check its validation rules
+    private JobPayload toPayload(JsonNode json, JobHandler<?, ?> handler) {
+        JobPayload payload;
+
+        try {
+            payload = objectMapper.treeToValue(json, handler.payloadType());
+        } catch (Exception e) {
+            throw new InvalidPayloadException("Payload does not match the job type", e);
+        }
+        if (payload == null) {
+            throw new InvalidPayloadException("Payload is empty");
+        }
+
+
+        // ? Not Understood
+        Set<ConstraintViolation<JobPayload>> errors = validator.validate(payload);
+        if (!errors.isEmpty()) {
+            String message = errors.stream()
+                .map(v -> v.getPropertyPath() + " " + v.getMessage())
+                .collect(Collectors.joining(", "));
+            throw new InvalidPayloadException(message);
+        }
+
+        return payload;
+    }
+    
+    // runs on the worker thread
+    private void runJob(UUID id, JobHandler<?, ?> handler, JobPayload payload) {
+        if (!setStatus(id, JobStatus.RUNNING)) {
+            return;                       // job was removed, nothing to run
+        }
+        try {
+            handler.executeUntyped(payload);
+            setStatus(id, JobStatus.SUCCEEDED);
+        } catch (Exception e) {
+            log.error("Job {} failed", id, e);
+            setStatus(id, JobStatus.FAILED);
+        }
+    }
+
+    // one place for "update + log if the job is missing"
+    private boolean setStatus(UUID id, JobStatus status) {
+        boolean updated = store.updateStatus(id, status);
+        if (!updated) {
+            log.warn("Job {} not found when setting {}", id, status);
+        }
+        return updated;
+    }
+
+
+    public Job getJob(UUID id){
+        Job job = store.findById(id).orElseThrow(
+            () -> new JobNotFoundException(id)
+        );
+        return job;
+    }
+
+}
+
+
+====================================================================================================
+FILE: src\main\java\com\sudhanva\task_forge\job\store\InMemoryJobStore.java
+====================================================================================================
+
+package com.sudhanva.task_forge.job.store;
+
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.springframework.stereotype.Component;
+
+import com.sudhanva.task_forge.job.exceptions.DuplicateJobException;
+import com.sudhanva.task_forge.job.model.Job;
+import com.sudhanva.task_forge.job.model.enums.JobStatus;
+
+@Component
+public class InMemoryJobStore implements JobStore{
+
+    private final Map<UUID,Job> jobs = new ConcurrentHashMap<>();
+
+    @Override
+    public Optional<Job> findById(UUID id) {
+        Job job = jobs.get(id);
+        return Optional.ofNullable(job);
+    }
+
+    @Override
+    public boolean remove(UUID id) {
+        Job job = jobs.remove(id);
+        return job != null;
+    }
+
+    @Override
+    public void save(Job job) {
+        // Service in the request stores the job so exception is handeled in global controller advice
+        Job existing = jobs.putIfAbsent(job.id(), job);
+         if (existing != null) {
+            // thrown 409 CONLICT 
+            throw new DuplicateJobException(job.id());
+        }
+    }
+
+    @Override
+    public boolean updateStatus(UUID id, JobStatus newStatus) {
+        // update is done by worker thread so .orElseThrow() 
+        // there is no http request waiting for this it wont reach controller advice
+        // if u do normally like find and replce with new 
+        // it will introduce race condition
+        Job updated = jobs.computeIfPresent(
+            id, 
+            (key,oldJob) -> new Job(
+                oldJob.id(),
+                newStatus,
+                oldJob.type()
+            )
+        );
+        return updated != null;
+    }
+    
+}
+
+
+====================================================================================================
+FILE: src\main\java\com\sudhanva\task_forge\job\store\JobStore.java
+====================================================================================================
+
+package com.sudhanva.task_forge.job.store;
+
+// import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import com.sudhanva.task_forge.job.model.Job;
+import com.sudhanva.task_forge.job.model.enums.JobStatus;
+
+public interface JobStore {
+    // save (create)
+    void save(Job job);
+    // findAll
+    // List<JobStatus> findAllJobs();
+    // findById
+    Optional<Job> findById(UUID id);
+    // update status
+    boolean updateStatus(UUID id,JobStatus newStatus);
+    // remove
+    boolean remove(UUID id);
+}
+
+
+====================================================================================================
+FILE: src\main\java\com\sudhanva\task_forge\scratch\A2PoolDemo.java
+====================================================================================================
+
+package com.sudhanva.task_forge.scratch;
+
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
+
+import com.sudhanva.task_forge.executor.JobExecutorFactory;
+
+public class A2PoolDemo {
+ 
+    public static void main(String[] args) {
+        
+        JobExecutorFactory factory = new JobExecutorFactory();
+        
+        ThreadPoolExecutor pool = factory.createExecutor();
+
+        for (int i = 1; i <= 40; i++) {
+
+            int taskNo = i;
+
+            try {
+                pool.execute(() -> {
+                    // Print task number and thread name
+                    System.out.println("Task No: "+taskNo + " Thread Name: "+Thread.currentThread().getName());
+                    try {
+                        // Sleep for 30 seconds
+                        // another thread can interrupt a sleeping thread before those 30 seconds are over.
+                        Thread.sleep(3000);    
+                    } catch (InterruptedException e) {
+                        System.out.println("Worker interrupted"+Thread.currentThread().getName());
+                        // pool.shutdown();
+                    }
+                });
+                System.out.println("Job Accepted: "+taskNo);
+            } catch (RejectedExecutionException e) {
+                System.out.println("Job Rejected: "+taskNo);
+            }
+        }
+
+        // Let running tasks finish, accept no new ones
+        pool.shutdown();
+    }
+    
+}
+
+
+====================================================================================================
+FILE: src\main\java\com\sudhanva\task_forge\TaskForgeApplication.java
+====================================================================================================
+
+package com.sudhanva.task_forge;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class TaskForgeApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(TaskForgeApplication.class, args);
+	}
+
+}
+
+
+====================================================================================================
+FILE: src\main\resources\application.yml
+====================================================================================================
+
+spring:
+    application:
+        name: my-spring-app
+    
+    datasource:
+        url: jdbc:postgresql://localhost:5433/task-forge
+        username: sudhanva
+        password: sudhanva
+
+    flyway:
+        enabled: true
+        locations: classpath:db/migration
+
+    jpa:
+        hibernate:
+            ddl-auto: validate
+
+====================================================================================================
+FILE: src\main\resources\db\migration\V1__smoke_test.sql
+====================================================================================================
+
+SELECT 1;
+
+====================================================================================================
+FILE: src\test\java\com\sudhanva\task_forge\A_Tests\JobHandlerRegistryTest.java
+====================================================================================================
+
+package com.sudhanva.task_forge.A_Tests;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+
+import com.sudhanva.task_forge.job.handler.EchoJobHandler;
+import com.sudhanva.task_forge.job.interfaces.JobHandler;
+import com.sudhanva.task_forge.job.interfaces.JobHandlerRegistry;
+import com.sudhanva.task_forge.job.interfaces.JobType;
+
+@SpringBootTest
+@Testcontainers 
+public class JobHandlerRegistryTest {
+    
+    @Autowired 
+    JobHandlerRegistry registry;
+
+    @Container 
+    @ServiceConnection
+    static PostgreSQLContainer<?> pg = 
+        new PostgreSQLContainer<>("postgres:16-alpine");
+
+
+    @Test
+    void shouldRegisterEchoHandler(){
+        JobHandler<?,?> handler = registry.getHandler(JobType.ECHO);
+        System.out.println(handler);
+        assertNotNull(handler);
+        assertInstanceOf(EchoJobHandler.class, handler);
+    }
+
+}
+
+
+====================================================================================================
+FILE: src\test\java\com\sudhanva\task_forge\A_Tests\JobHandlerTests.java
+====================================================================================================
+
+package com.sudhanva.task_forge.A_Tests;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
+
+import com.sudhanva.task_forge.job.handler.EchoJobHandler;
+import com.sudhanva.task_forge.job.handler.EchoPayload;
+import com.sudhanva.task_forge.job.interfaces.JobHandler;
+import com.sudhanva.task_forge.job.interfaces.JobHandlerRegistry;
+import com.sudhanva.task_forge.job.interfaces.JobType;
+
+public class JobHandlerTests {
+    
+    @Test
+    void unkownJobType(){
+        
+        JobHandlerRegistry registry = 
+            new JobHandlerRegistry(List.of());
+
+
+        assertThrows(
+            IllegalArgumentException.class, 
+            () -> {
+                registry.getHandler(JobType.ECHO);
+            }
+        );
+    }
+
+    @Test
+    void duplicateJobType(){
+        JobHandler<EchoPayload,String> handler = 
+                new EchoJobHandler();
+
+        JobHandler<EchoPayload,String> handler2 = 
+                new EchoJobHandler();
+        
+        assertThrows(
+            IllegalStateException.class, 
+            () -> {
+                new JobHandlerRegistry(List.of(handler,handler2));
+            }
+        );
+    }
+
+}
+
+
+====================================================================================================
+FILE: src\test\java\com\sudhanva\task_forge\smoke_test\TFSmokeTest.java
+====================================================================================================
+
+package com.sudhanva.task_forge.smoke_test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+
+// @SpringBootTest 
+@Testcontainers 
+public class TFSmokeTest {
+    
+    @Container
+    @ServiceConnection
+    static PostgreSQLContainer<?> pg = 
+        new PostgreSQLContainer<>("postgres:16-alpine");
+
+
+    @Autowired
+    JdbcTemplate jdbc;
+
+    // @Test
+    void dbIsReachableAndFlywayRan(){
+
+        Integer applied = jdbc.queryForObject(
+            "SELECT count(*) FROM flyway_schema_history WHERE success = true",
+            Integer.class);
+        assertTrue(applied >= 1,"db connection and flyway migartion failed");
+    }
+
+}
+
+

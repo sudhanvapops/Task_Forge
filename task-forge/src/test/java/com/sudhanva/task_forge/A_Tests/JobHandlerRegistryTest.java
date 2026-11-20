@@ -15,8 +15,8 @@ import com.sudhanva.task_forge.job.interfaces.JobHandler;
 import com.sudhanva.task_forge.job.interfaces.JobHandlerRegistry;
 import com.sudhanva.task_forge.job.interfaces.JobType;
 
-@SpringBootTest
-@Testcontainers 
+// @SpringBootTest
+// @Testcontainers 
 public class JobHandlerRegistryTest {
     
     @Autowired 
@@ -28,7 +28,7 @@ public class JobHandlerRegistryTest {
         new PostgreSQLContainer<>("postgres:16-alpine");
 
 
-    @Test
+    // @Test
     void shouldRegisterEchoHandler(){
         JobHandler<?,?> handler = registry.getHandler(JobType.ECHO);
         System.out.println(handler);

@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -26,6 +27,20 @@ public class GlobalExceptionHandler {
             .build();
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponseDto> handleInvalidJson(
+        HttpMessageNotReadableException exception
+    ) {
+
+        ErrorResponseDto response = ErrorResponseDto.builder()
+            .success(false)
+            .errorCode(ErrorCode.BAD_REQUEST)
+            .message(exception.getMessage())
+            .timestamp(Instant.now())
+            .build();
+        return ResponseEntity.badRequest().body(response);
     }
     
 }

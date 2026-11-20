@@ -2,6 +2,7 @@ package com.sudhanva.task_forge.job.exception_handlers;
 
 
 import java.time.Instant;
+import java.util.concurrent.RejectedExecutionException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +13,7 @@ import com.sudhanva.task_forge.common.api.ErrorCode;
 import com.sudhanva.task_forge.common.api.ErrorResponseDto;
 import com.sudhanva.task_forge.job.exceptions.DuplicateJobException;
 import com.sudhanva.task_forge.job.exceptions.ExecutorShutdownException;
+import com.sudhanva.task_forge.job.exceptions.InvalidPayloadException;
 import com.sudhanva.task_forge.job.exceptions.JobNotFoundException;
 import com.sudhanva.task_forge.job.exceptions.QueueFullException;
 
@@ -75,6 +77,17 @@ public class JobExceptionHandler {
 
         // 503
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(response);
+    }
+
+    @ExceptionHandler(InvalidPayloadException.class)
+    public ResponseEntity<ErrorResponseDto> handleInvalidPayload(InvalidPayloadException exception) {
+        ErrorResponseDto response = ErrorResponseDto.builder()
+            .success(false)
+            .errorCode(ErrorCode.INVALID_PAYLOAD)
+            .message(exception.getMessage())
+            .timestamp(Instant.now())
+            .build();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
 

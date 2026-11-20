@@ -13,7 +13,7 @@ public class JobHandlerRegistry {
     private final Map<JobType,JobHandler<?,?>> jobHandlers;
 
     public JobHandlerRegistry(List<JobHandler<?,?>> handlers){
-        this.jobHandlers =  handlers.stream().collect(
+        jobHandlers =  handlers.stream().collect(
             Collectors.toUnmodifiableMap( 
                 handler -> handler.type(), 
                 handler -> handler
