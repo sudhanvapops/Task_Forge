@@ -45,7 +45,9 @@ public class InMemoryJobStore implements JobStore{
         // if u do normally like find and replce with new 
         // it will introduce race condition
         Job updated = jobs.computeIfPresent(
-            id, 
+            id,
+            // Takes the lambda's return value 
+            // and replaces the existing value in the map.
             (key,oldJob) -> new Job(
                 oldJob.id(),
                 newStatus,

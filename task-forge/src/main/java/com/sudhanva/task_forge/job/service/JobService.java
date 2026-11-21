@@ -42,6 +42,7 @@ public class JobService {
     private final JobStore store;
     private final ThreadPoolExecutor jobExecutor;
     private final JobHandlerRegistry registry;
+    
     private final ObjectMapper objectMapper;
     private final Validator validator;
 
@@ -66,7 +67,7 @@ public class JobService {
             throw jobExecutor.isShutdown()
                     ? new ExecutorShutdownException()
                     : new QueueFullException();
-        }
+        } 
         return job;
     }
 
