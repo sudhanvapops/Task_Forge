@@ -10,7 +10,7 @@ public class EchoJobHandler implements JobHandler<EchoPayload, String>{
 
     @Override
     public String execute(EchoPayload payload) throws Exception {
-        Thread.sleep(payload.delayMs()); 
+        Thread.sleep(payload.delayMs());
         return "Echoed: "+payload.message();
     }
 

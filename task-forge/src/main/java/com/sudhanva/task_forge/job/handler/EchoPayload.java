@@ -19,7 +19,7 @@ public record EchoPayload(
         }
         
         if (delayMs > 9000){
-            throw new IllegalArgumentException("delay must not exceed 9 seconds");
+            throw new IllegalArgumentException("delay must not exceed 20 seconds");
         }
     }
 

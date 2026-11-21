@@ -94,4 +94,129 @@ END OF BLOCK
 
 START: begin with ORIENTATION FIRST. Do not summarize this brief back to me.
 
+TEST DRIVEN LEARNING
+
+- Test-driven: Claude writes the tests, I write the logic until they pass.
+  I read the tests, then rewrite them myself by understanding (not copying).
+- I will use another LLM to verify my code. Claude should write a briefing
+  for that LLM (stack, package layout, what each class must do, hints only,
+  no solutions). Not written yet: ask for it when needed.
+- I upload my full code as output.txt (made by combine.py) to Project sources.
+  Read it before answering. Do not guess the code.
+- I still design my own tests for new features where I choose to.
+
 === BLOCK ===
+
+
+
+
+=== RESUME NOTE (A3 almost closed, A4 next) ===
+
+Stack: Spring Boot 4.1.2, Java 21, Maven, Postgres 16-alpine, Flyway,
+Testcontainers 2.0.5, Lombok, Jackson 3 (tools.jackson, NOT com.fasterxml).
+Base package: com.sudhanva.task_forge. Dev DB via Compose on
+localhost:5433/task-forge. Tests with a Spring context (JobHandlerRegistryTest)
+use Testcontainers, not the Compose DB.
+
+NEW WAY OF WORKING (changed in this session, follows the protocol otherwise)
+- Test-driven: Claude writes the tests, I write the logic until they pass.
+  I read the tests, then rewrite them myself by understanding (not copying).
+- I will use another LLM to verify my code. Claude should write a briefing
+  for that LLM (stack, package layout, what each class must do, hints only,
+  no solutions). Not written yet: ask for it when needed.
+- I upload my full code as output.txt (made by combine.py) to Project sources.
+  Read it before answering. Do not guess the code.
+- I still design my own tests for new features where I choose to.
+
+BLOCK STATE
+A0 to A2 done. A3 is done except the items below. NEXT: A4 (swap the plain
+ThreadPoolExecutor for a Spring TaskExecutor bean and compare it to A2),
+then A5 (3 lines in docs/tradeoffs.md on 202 vs 200).
+
+WHAT EXISTS NOW (all tests green before the last change)
+- Routes: POST /api/jobs/post-job (202 + Location), GET /api/jobs/{id}.
+- ApiResponse<T> wrapper on success. ErrorResponseDto (success, errorCode,
+  message, timestamp) on errors.
+- Queue full = 503. ExecutorShutdown = 503. NotFound = 404. Duplicate = 409.
+  Bad input = 400 (validation, bad JSON, unknown type, bad UUID).
+- Pool: core 2, max 4, ArrayBlockingQueue(10), AbortPolicy, destroyMethod
+  shutdown. Verified: 16 POSTs with 9s jobs gave 14 accepted, 2 rejected.
+  Extra workers die after idle time. Workers gone after app stop.
+- runJob: now catches Throwable, logs, sets FAILED, rethrows if it is an
+  Error (my choice: do not hide serious errors; pool replaces the worker).
+- Tests (Claude wrote them, I ran them): InMemoryJobStoreTest (21),
+  JobServiceGetJobTest (5), JobControllerTest (16), JobServiceSubmitTest (16+).
+  Drills done: removing store.remove() in the reject catch turned 2 tests red.
+- EchoPayload delay limit is 9000 ms (I raised it to 20s only for Postman,
+  then put it back).
+
+OPEN (in this order)
+
+2. Write docs (short, 1 to 2 lines each):
+   - tradeoffs.md: 429 vs 503, why 202 not 200, wrapper vs ProblemDetail,
+     bounded vs unbounded queue (backpressure), Throwable rethrow choice,
+     why the delay cap exists, /post-job vs POST /jobs.
+   - error-log.md: all-500 bug (missing @Order on advice), Jackson 2 vs 3
+     mix, ghost job (queue full without store.remove), @RequestBody missing,
+     Docker Compose not running made a test fail.
+   - parking-lot.md: validator branch not covered (EchoPayload checks in its
+     constructor, not annotations); 500 leaks exception.getMessage(); unknown
+     URL returns 500 instead of 404; debug prints in the handler; shutdown()
+     does not wait for queued jobs; error field on Job; PriorityBlockingQueue
+     is unbounded; unknown job type gives IllegalArgumentException (not
+     mapped to 400); lost update vs legal status transitions (state machine
+     in Block B).
+   - syntax-notes.md: new APIs I looked up (WebMvcTest, MockitoBean,
+     CountDownLatch, ServletUriComponentsBuilder, instanceof pattern, etc.).
+3. Cleanup: debug prints in handler, delete scratch/, private final fields
+   in JobExecutorFactory, TaskForgeApplicationTests must not use Compose DB,
+   typo packages (exceptions/exception_handlers) if I want.
+
+
+CLOSED-BOOK RESULTS (A3, graded by Claude)
+- Q1 where is the job after 202, why 202: SOLID (add: map is the status
+  board, the pool queue is the waiting line).
+- Q2 computeIfPresent: SHAKY. I mixed lost update with ghost update. Ghost
+  update = get, then remove by another thread, then put brings the job back.
+  The test that catches it is the multi-thread update-vs-remove test.
+- Q3 save before execute: SHAKY. I said exception. Real result: updateStatus
+  returns false, runJob returns quietly, job stays QUEUED forever, silent lost
+  work.
+- Q4 Error not caught by catch(Exception): SHAKY. App does not crash, only one
+  worker dies and the pool replaces it. Job stuck as RUNNING. Fix = Throwable.
+- Q5 bounded vs unbounded queue: SOLID (add: no rejections, wait time and
+  memory grow, backpressure).
+- Q6 why losing jobs on restart is bad, and the fix: SOLID (add: GET returns
+  404 so system denies a job it accepted; Postgres as status board AND queue;
+  leases/heartbeats for RUNNING jobs).
+Revisit plan: trace "what exactly happens" step by step (which thread, which
+line, what state) before answering.
+
+DECISIONS (mine)
+- Rethrow Error after marking FAILED.
+- Keep ApiResponse wrapper; queue full = 503.
+- Enum still has CANCELLED/RETRYING/DEAD style values: decide in Block B.
+
+SHORTCUTS USED SO FAR
+- A0: SKIP EXAMPLE, SKIP EVIDENCE
+- A2: SYNTAX SKELETON, SKIP EVIDENCE
+- A3: SKIP EXAMPLE (MAP part), SYNTAX SKELETON, test-writing delegated to
+  Claude (store, getJob, controller, submit tests)
+- Time: A3 took about 8 hours.
+
+LEARNER NOTES (follow strictly)
+- WRITE IN PLAIN, SIMPLE LANGUAGE. Short sentences. Define jargon where
+  used. Every reply must make sense on its own, because I paste replies into
+  another LLM. Keep replies short unless teaching.
+- Java syntax and JUnit APIs are my weak spot. "SYNTAX SKELETON" = shape of
+  the code when the DESIGN is mine.
+- I keep docs/syntax-notes.md (one line per looked-up API).
+- Big picture (HLD) BEFORE questions. At most one question per message.
+- Be honest and direct. No flattery. I tend to feel "I am nothing" when
+  problems turn silent and hard; keep feedback factual.
+- Stay within the Intermediate depth ceiling. Do not build Block B things
+  early.
+
+START: do NOT re-orient on A3 do 
+Write docs (short, 1 to 2 lines each)
+and A4 ORIENTATION FIRST as the Mentor Protocol says.

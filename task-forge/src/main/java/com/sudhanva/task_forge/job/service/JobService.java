@@ -29,7 +29,6 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 
-
 // Test These
 // good:           {"type":"ECHO","payload":{"message":"hi"}}   -> 202
 // wrong shape:    {"type":"ECHO","payload":{"x":1}}            -> 400 (not 500)
@@ -39,22 +38,21 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class JobService {
-    
+
     private final JobStore store;
     private final ThreadPoolExecutor jobExecutor;
     private final JobHandlerRegistry registry;
     private final ObjectMapper objectMapper;
     private final Validator validator;
 
-
-    private static final Logger log = 
-            LoggerFactory.getLogger(JobService.class);
-
+    private static final Logger log = LoggerFactory.getLogger(JobService.class);
 
     public Job submit(SubmitJobRequest request) {
         // checks that can fail come first
         // state changes last
         JobHandler<?, ?> handler = registry.getHandler(request.type());
+
+        // convrting request payload to proper format
         JobPayload payload = toPayload(request.payload(), handler);
 
         Job job = new Job(UUID.randomUUID(), JobStatus.QUEUED, request.type());
@@ -62,18 +60,17 @@ public class JobService {
         store.save(job);
 
         try {
-            jobExecutor.execute(() -> runJob(job.id(), handler,payload));
+            jobExecutor.execute(() -> runJob(job.id(), handler, payload));
         } catch (RejectedExecutionException e) {
             store.remove(job.id());
             throw jobExecutor.isShutdown()
-                ? new ExecutorShutdownException()
-                : new QueueFullException();
+                    ? new ExecutorShutdownException()
+                    : new QueueFullException();
         }
         return job;
     }
 
-
-     // JSON -> payload object, then check its validation rules
+    // JSON -> payload object, then check its validation rules
     private JobPayload toPayload(JsonNode json, JobHandler<?, ?> handler) {
         JobPayload payload;
 
@@ -86,23 +83,23 @@ public class JobService {
             throw new InvalidPayloadException("Payload is empty");
         }
 
-
         // ? Not Understood
         Set<ConstraintViolation<JobPayload>> errors = validator.validate(payload);
         if (!errors.isEmpty()) {
             String message = errors.stream()
-                .map(v -> v.getPropertyPath() + " " + v.getMessage())
-                .collect(Collectors.joining(", "));
+                    .map(v -> v.getPropertyPath() + " " + v.getMessage())
+                    .collect(Collectors.joining(", "));
             throw new InvalidPayloadException(message);
         }
 
         return payload;
     }
-    
+
     // runs on the worker thread
     private void runJob(UUID id, JobHandler<?, ?> handler, JobPayload payload) {
         if (!setStatus(id, JobStatus.RUNNING)) {
-            return;                       // job was removed, nothing to run
+            // job was removed, nothing to run
+            return;
         }
         try {
             handler.executeUntyped(payload);
@@ -110,6 +107,16 @@ public class JobService {
         } catch (Exception e) {
             log.error("Job {} failed", id, e);
             setStatus(id, JobStatus.FAILED);
+        } catch (Throwable t) {
+            // This is for Error crash
+            // the ThreaPoolExecutor later 
+            // will replaces the dyied worker
+            // thats why throwing the error again to crash the worker thread
+            log.error("Job {} failed", id, t);
+            setStatus(id, JobStatus.FAILED);
+            if (t instanceof Error) {
+                throw t;
+            }
         }
     }
 
@@ -122,11 +129,9 @@ public class JobService {
         return updated;
     }
 
-
-    public Job getJob(UUID id){
+    public Job getJob(UUID id) {
         Job job = store.findById(id).orElseThrow(
-            () -> new JobNotFoundException(id)
-        );
+                () -> new JobNotFoundException(id));
         return job;
     }
 
