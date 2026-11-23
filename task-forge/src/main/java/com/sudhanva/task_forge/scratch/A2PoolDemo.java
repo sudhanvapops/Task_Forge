@@ -3,28 +3,30 @@ package com.sudhanva.task_forge.scratch;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+
 import com.sudhanva.task_forge.executor.JobExecutorFactory;
 
 public class A2PoolDemo {
  
     public static void main(String[] args) {
         
-        JobExecutorFactory factory = new JobExecutorFactory();
+        // JobExecutorFactory factory = new JobExecutorFactory();
         
-        ThreadPoolExecutor pool = factory.createExecutor();
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 
-        for (int i = 1; i <= 40; i++) {
+        for (int i = 1; i <= 16; i++) {
 
             int taskNo = i;
 
             try {
-                pool.execute(() -> {
+                executor.execute(() -> {
                     // Print task number and thread name
                     System.out.println("Task No: "+taskNo + " Thread Name: "+Thread.currentThread().getName());
                     try {
                         // Sleep for 30 seconds
                         // another thread can interrupt a sleeping thread before those 30 seconds are over.
-                        Thread.sleep(3000);    
+                        Thread.sleep(9000);    
                     } catch (InterruptedException e) {
                         System.out.println("Worker interrupted"+Thread.currentThread().getName());
                         // pool.shutdown();
@@ -37,7 +39,7 @@ public class A2PoolDemo {
         }
 
         // Let running tasks finish, accept no new ones
-        pool.shutdown();
+        executor.shutdown();
     }
     
 }

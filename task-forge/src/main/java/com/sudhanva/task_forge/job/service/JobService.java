@@ -3,11 +3,12 @@ package com.sudhanva.task_forge.job.service;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.ThreadPoolExecutor;
+// import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import tools.jackson.databind.JsonNode;
@@ -40,7 +41,7 @@ import lombok.RequiredArgsConstructor;
 public class JobService {
 
     private final JobStore store;
-    private final ThreadPoolExecutor jobExecutor;
+    private final ThreadPoolTaskExecutor jobExecutor;
     private final JobHandlerRegistry registry;
     
     private final ObjectMapper objectMapper;
@@ -64,7 +65,7 @@ public class JobService {
             jobExecutor.execute(() -> runJob(job.id(), handler, payload));
         } catch (RejectedExecutionException e) {
             store.remove(job.id());
-            throw jobExecutor.isShutdown()
+            throw jobExecutor.getThreadPoolExecutor().isShutdown()
                     ? new ExecutorShutdownException()
                     : new QueueFullException();
         } 
@@ -103,6 +104,7 @@ public class JobService {
             return;
         }
         try {
+            System.out.println(Thread.currentThread().getName());
             handler.executeUntyped(payload);
             setStatus(id, JobStatus.SUCCEEDED);
         } catch (Exception e) {

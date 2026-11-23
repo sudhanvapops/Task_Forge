@@ -4,6 +4,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import lombok.RequiredArgsConstructor;
@@ -12,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class WorkerPoolStartupCheck implements ApplicationRunner {
 
-    private final ThreadPoolExecutor jobExecutor;
+    private final ThreadPoolTaskExecutor jobExecutor;
 
     @Override
     public void run(ApplicationArguments args) {
@@ -22,11 +23,10 @@ public class WorkerPoolStartupCheck implements ApplicationRunner {
                 + jobExecutor.getCorePoolSize());
 
         System.out.println("Maximum Pool Size: "
-                + jobExecutor.getMaximumPoolSize());
+                + jobExecutor.getMaxPoolSize());
 
         System.out.println("Queue Capacity: "
-                + (jobExecutor.getQueue().size()
-                        + jobExecutor.getQueue().remainingCapacity()));
+                + (jobExecutor.getQueueCapacity()));
 
         System.out.println("=================================");
     }
