@@ -79,7 +79,7 @@ class InMemoryJobStoreTest {
     @Test
     void save_sameIdTwice_keepsTheOriginalJob() {
         Job original = newJob();
-        Job sameIdOtherStatus = new Job(original.id(), JobStatus.FAILED, JobType.ECHO);
+        Job sameIdOtherStatus = new Job(original.id(), JobStatus.CANCELLED, JobType.ECHO);
         store.save(original);
 
         assertThrows(DuplicateJobException.class, () -> store.save(sameIdOtherStatus));
@@ -147,9 +147,9 @@ class InMemoryJobStoreTest {
         store.save(a);
         store.save(b);
 
-        store.updateStatus(a.id(), JobStatus.FAILED);
+        store.updateStatus(a.id(), JobStatus.CANCELLED);
 
-        assertEquals(JobStatus.FAILED, store.findById(a.id()).orElseThrow().status());
+        assertEquals(JobStatus.CANCELLED, store.findById(a.id()).orElseThrow().status());
         assertEquals(JobStatus.QUEUED, store.findById(b.id()).orElseThrow().status());
     }
 
@@ -286,7 +286,7 @@ class InMemoryJobStoreTest {
         Job job = newJob();
         store.save(job);
 
-        JobStatus[] statuses = {JobStatus.RUNNING, JobStatus.SUCCEEDED, JobStatus.FAILED};
+        JobStatus[] statuses = {JobStatus.RUNNING, JobStatus.SUCCEEDED, JobStatus.CANCELLED};
         ExecutorService pool = Executors.newFixedThreadPool(THREADS);
         CountDownLatch startGate = new CountDownLatch(1);
         AtomicInteger falseResults = new AtomicInteger();

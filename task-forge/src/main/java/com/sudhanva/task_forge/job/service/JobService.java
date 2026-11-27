@@ -109,14 +109,14 @@ public class JobService {
             setStatus(id, JobStatus.SUCCEEDED);
         } catch (Exception e) {
             log.error("Job {} failed", id, e);
-            setStatus(id, JobStatus.FAILED);
+            setStatus(id, JobStatus.CANCELLED);
         } catch (Throwable t) {
             // This is for Error crash
             // the ThreaPoolExecutor later 
             // will replaces the dyied worker
             // thats why throwing the error again to crash the worker thread
             log.error("Job {} failed", id, t);
-            setStatus(id, JobStatus.FAILED);
+            setStatus(id, JobStatus.CANCELLED);
             if (t instanceof Error) {
                 throw t;
             }

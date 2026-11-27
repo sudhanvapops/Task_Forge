@@ -468,7 +468,7 @@ class JobServiceSubmitTest {
         finishAllJobs();
 
         assertEquals(
-                JobStatus.FAILED,
+                JobStatus.CANCELLED,
                 service.getJob(job.id()).status()
         );
     }
@@ -491,7 +491,7 @@ class JobServiceSubmitTest {
         finishAllJobs();
 
         assertEquals(
-                JobStatus.FAILED,
+                JobStatus.CANCELLED,
                 service.getJob(bad.id()).status()
         );
 
