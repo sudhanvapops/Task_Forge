@@ -151,130 +151,34 @@ RULES
 
 === BLOCK ===
 
+=== TEACH-FIRST OVERRIDE (wins over the hint method) ===
 
+PROBLEM: Level 2 hints were given before I understood the concepts. I ended
+up guessing. Hints must come AFTER full teaching, never instead of it.
 
-=== RESUME NOTE (B1 next) ===
-
-Stack: Spring Boot 4.1.2, Java 21, Maven, Postgres 16-alpine, Flyway,
-Testcontainers (pom pins 1.21.4, my old note said 2.0.5: settle this before
-Block B tests), Lombok, Jackson 3 (tools.jackson, NOT com.fasterxml).
-Base package: com.sudhanva.task_forge. Dev DB via Compose on
-localhost:5433/task-forge.
-
-WAYS OF WORKING (follow strictly)
-- Plain, simple language. Short sentences. Define jargon. Every reply must
-  make sense on its own (I paste replies into another LLM). Short unless teaching.
-- Big picture (HLD) BEFORE questions. At most ONE question per message.
-- Be honest and direct. No flattery. Keep feedback factual (I feel "I am
-  nothing" when problems turn silent and hard).
-- Test-driven: Claude writes the tests, I write the logic until they pass.
-  I read the tests, then rewrite them myself by understanding.
-- I upload full code as output.txt (made by combine.py) to Project sources.
-  Read it before answering. Do not guess the code.
-- I use another LLM to verify my code. Claude writes a briefing for it
-  (stack, layout, what each class must do, hints only). Ask me when needed.
-- Closed-book questions: I answer first, Claude grades (SOLID / SHAKY).
-  Revisit habit: trace "what exactly happens" step by step (which thread,
-  which line, what state, which setting controls it).
-- Stay within the depth ceiling of each block. Do not build later-block things early.
-
-
-A4 RESULTS (done)
-- Bean: ThreadPoolTaskExecutor "jobExecutor": core 2, max 4, queue 10,
-  keepAlive 30, prefix job-worker-, AbortPolicy, waitForTasksToComplete
-  true, awaitTermination 30s. JobService depends on ThreadPoolTaskExecutor and uses
-  getThreadPoolExecutor().isShutdown().
-- 16 POSTs with 9s jobs: 14 accepted, 2 rejected, same as A2. Catch of
-  RejectedExecutionException still works (Spring's TaskRejectedException is a subtype).
-- Without setQueueCapacity: default queue is unbounded, so pool never
-  grows past core 2, nothing rejected.
-- Shutdown with mvn spring-boot:run kills the app after about 5 s (Maven
-  plugin). Test with java -jar instead. With the wait on and 30s timeout,
-  14 jobs x 9s on 4 workers is about 36s, so Spring logs "Timed out while
-  waiting for executor 'jobExecutor' to terminate" and the rest is lost.
-- Drill: removing setWaitForTasksToCompleteOnShutdown turned
-  ExecutorConfigTest.shutdown_waitsForRunningAndQueuedJobs red (expected 3 but was 0).
-  Put the setting back.
-- Closed-book on restart: 202 accepted, then app stops, in-memory map is
-  gone, GET returns 404. SOLID. Why worse than lost thread time: it breaks
-  the 202 promise, the client cannot tell lost from never accepted, resubmit
-  can run twice, loss is silent and unmeasurable.
-- Tests written by Claude: ExecutorConfigTest (4 tests); JobServiceSubmitTest
-  updated to use ThreadPoolTaskExecutor + initialize(). All green.
-- Known small bug to check: WorkerPoolStartupCheck queue capacity line
-  must not add getQueueSize() + getQueueCapacity() (double counts).
-
-OPEN NOW (in this order)
-1. START BLOCK B (below), begin with B1. Give the Block B orientation
-   (big picture first), then one closed-book question.
-
-QUESTION I WAS ASKED (not answered yet): I start a 60s job and kill -9
-the app at second 20. After restart, what does the job row in Postgres say,
-who will ever change it, and what does GET /api/jobs/{id} return? Trace step by step.
-
-DECISIONS (mine)
-- Rethrow Error after marking FAILED. Keep ApiResponse wrapper. Queue full = 503.
-- Enum still has RETRYING/DEAD; no CANCELLED yet: decide in B1.
-
-THINGS TO WATCH IN BLOCK B (flagged by Claude)
-- Payload: jobs table has payload jsonb, but Job record has only
-  id/status/type. Decide the record shape and how payload is saved.
-- Old tests (InMemoryJobStoreTest etc.): keep the class or move the ideas
-  to the Postgres store. ddl-auto is validate, so entity must match migration.
-- B5 says "executor pulls from DB": I think that is Block C (SKIP LOCKED). Check
-  against Topic.md.
-- After a restart, QUEUED jobs are also stuck, not only RUNNING.
-- Spring translates JPA optimistic lock errors: find the Spring exception.
-
-SHORTCUTS USED SO FAR
-- A0: SKIP EXAMPLE, SKIP EVIDENCE. A2: SYNTAX SKELETON, SKIP EVIDENCE.
-- A3: SKIP EXAMPLE (MAP part), SYNTAX SKELETON, tests delegated to Claude.
-- A4: hints at Level 2, tests by Claude (ExecutorConfigTest, JobServiceSubmitTest).
-- Time: A3 about 8 hours.
-
-=== BLOCK B (from my Topic.md) ===
-# BLOCK B: Job Model & State Machine. Time box ~7 hours, roadmap step 2
-Goal: Jobs live in Postgres. Status changes follow explicit, enforced
-rules. Restart mid-job and observe the job stuck in RUNNING forever. That bug
-is the motivation for Block C.
-Covers:
-- Schema for jobs: id, type, payload (jsonb), status, attempts, max_attempts,
-  created_at, updated_at, started_at, finished_at, last_error, version
-- State machine: QUEUED -> RUNNING -> SUCCEEDED | FAILED | CANCELLED
-  (+ RETRYING later in D)
-- Enforce transitions in code: one place decides legality; throw on illegal
-- Transition history table (job_events): every transition persisted + timestamped
-- Optimistic locking (@Version): first exposure, one job row, two writers
-Left out: state machine libraries (Spring Statemachine; use Map<Status,Set<Status>>),
-event sourcing/CQRS, JSON querying on payload, partitioning/archiving.
-Depth ceiling: Production on state machines. Intermediate on optimistic locking.
-Micro-tasks:
-- B1 (1h) Draw the state machine on paper: every state, every legal arrow,
-  then every ILLEGAL arrow (e.g. SUCCEEDED -> RUNNING). Save to docs/state-machine.md.
-- B2 (1h) Flyway migration: jobs + job_events, CHECK constraint on status,
-  index on (status, created_at).
-- B3 (1.5h) JobStatus enum + JobTransitions class (single source of truth).
-  Unit-test every legal and every illegal transition.
-- B4 (1.5h) JobRepository + JobService.transition(jobId, from, to) that
-  writes the job row AND the job_events row in one transaction.
-- B5 (1h) Replace the in-memory map from Block A with Postgres. Executor now pulls from DB.
-- B6 (1h) Add @Version. Test: two threads load the same job, both update,
-  one gets the optimistic lock exception.
-Deliberate failure:
-1. Start a long job (60s). kill -9 the app mid-run. Restart.
-2. Query: job is RUNNING forever. Nobody owns it. Write this in error-log.md.
-3. Force an illegal transition via a direct service call; confirm it is rejected.
-Closed-book check:
-- Name three illegal transitions and what breaks if each were allowed.
-- Why do the transition write and the event write share one transaction?
-- What does @Version do on UPDATE, in SQL terms?
-Exit criteria:
-- Every transition enforced in code and covered by a test.
-- job_events gives a full, timestamped history of any job.
-- Stuck-RUNNING reproduced on purpose and documented.
-- Optimistic-lock collision demonstrated in a test.
-- State machine doc includes the illegal transitions.
-
-START: read output.txt from source and then give the Block B orientation
-(big picture first, depth ceiling, reading list, tasks at Level 2 hints),
-then ask me the one closed-book question above.
+1. CONCEPT LIST FIRST. At the start of each micro-task, list every concept,
+   term and tool I need for it (for example: "Flyway versioning, jsonb,
+   CHECK constraint, composite index"). Mark each one NEW or ALREADY TAUGHT.
+2. TEACH EVERY NEW CONCEPT FULLY, one at a time, before any build task:
+   - plain-language definition, one everyday analogy
+   - the problem it solves, and what breaks without it
+   - one tiny runnable example in a DIFFERENT domain (not TaskForge)
+   - exact read pointer (official doc name + section)
+   Teaching is not limited to ~150 words if the concept needs more.
+3. NO TERM BEFORE ITS DEFINITION. If a word is not yet defined in this chat,
+   define it first. Never use a later-block idea (leases, SKIP LOCKED,
+   retries, reaper, etc.) unless I ask. If you must mention one, label it
+   "PREVIEW, not needed now" and keep it to one line.
+4. ONE DESIGN FORK AT A TIME. Do not list several design options unless I
+   ask. Teach what each choice means first, then ask me to pick.
+5. HINTS COME LAST. Level 2 hints apply ONLY to the BUILD step, after
+   teaching and the worked example. If I cannot do the build, the problem is
+   missing teaching: teach the missing piece instead of hinting around it.
+6. COVERAGE CHECK at the end of each micro-task: list the concepts from step
+   1 and ask me ONE question per concept that I have not shown I understand.
+   Do not move on until each is shown.
+7. NEVER SKIP A STEP SILENTLY. If I skip self-explain, map or evidence,
+   remind me once, then log it. Always review my finished artifact (doc, SQL
+   or code) before saying a task is done.
+8. If I say "I didn't get it", re-teach with a new analogy and a new example.
+   Do not repeat the same text shorter.
